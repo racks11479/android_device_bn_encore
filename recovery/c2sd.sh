@@ -4,12 +4,11 @@
 
 TW_FILENAME=$2
 
-racks-bb mount /sdcard
-racks-bb unzip TW_FILENAME ramdisk.img -d /tmp/c2dsd
-racks-bb unzip TW_FILENAME META-INF/com/google/android/updater-script -d /tmp/c2dsd
-racks-bb unzip TW_FILENAME system/etc/vold.fstab -d /tmp/c2dsd
-mkdir -p /tmp/c2dsd/rd
-cd /tmp/c2dsd/rd
+mkdir -p /tmp/c2sd/rd
+racks-bb unzip $TW_FILENAME ramdisk.img -d /tmp/c2sd
+racks-bb unzip $TW_FILENAME META-INF/com/google/android/updater-script -d /tmp/c2sd
+racks-bb unzip $TW_FILENAME system/etc/vold.fstab -d /tmp/c2sd
+cd /tmp/c2sd/rd
 		
 dd if=../ramdisk.img bs=64 skip=1 | gunzip -c | cpio -i
 
@@ -17,7 +16,7 @@ INIT=init.encore.rc
 sed -i 's/mmcblk0p5/mmcblk1p2/' $INIT 
 sed -i 's/mmcblk0p6/mmcblk1p3/' $INIT
 
-cd /tmp/c2dsd
+cd /tmp/c2sd
 		
 rm ramdisk.img
 mkbootfs rd | gzip > nuRamdisk-new.gz
@@ -32,8 +31,8 @@ sed -i 's/mmcblk0p1/mmcblk1p1/' $INIT
 INIT=system/etc/vold.fstab
 sed -i 's/sdcard auto/sdcard 4/' $INIT
 		
-zip -ru TW_FILENAME
+zip -ru $TW_FILENAME
 
 cd ~
 
-rm -r /tmp/c2dsd
+rm -r /tmp/c2sd
