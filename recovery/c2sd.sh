@@ -2,12 +2,12 @@
 
 #Convert2SD TWRP by Racks11479
 
-TW_FILENAME=$2
+TW_FILENAME=$1
 
 mkdir -p /tmp/c2sd/rd
-racks-bb unzip $TW_FILENAME ramdisk.img -d /tmp/c2sd
-racks-bb unzip $TW_FILENAME META-INF/com/google/android/updater-script -d /tmp/c2sd
-racks-bb unzip $TW_FILENAME system/etc/vold.fstab -d /tmp/c2sd
+busyboxracks unzip $TW_FILENAME ramdisk.img -d /tmp/c2sd
+busyboxracks unzip $TW_FILENAME META-INF/com/google/android/updater-script -d /tmp/c2sd
+busyboxracks unzip $TW_FILENAME system/etc/vold.fstab -d /tmp/c2sd
 cd /tmp/c2sd/rd
 		
 dd if=../ramdisk.img bs=64 skip=1 | gunzip -c | cpio -i
@@ -32,7 +32,3 @@ INIT=system/etc/vold.fstab
 sed -i 's/sdcard auto/sdcard 4/' $INIT
 		
 zip -ru $TW_FILENAME
-
-cd ~
-
-rm -r /tmp/c2sd
