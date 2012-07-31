@@ -115,6 +115,14 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/postrecoveryboot.sh:recovery/root/sbin/postrecoveryboot.sh
 
+# twrp bins for sd recovery
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/recovery/racks-bb:recovery/root/sbin/racks-bb
+    $(LOCAL_PATH)/recovery/mkimage:recovery/root/sbin/mkimage
+    $(LOCAL_PATH)/recovery/mkbootfs:recovery/root/sbin/mkbootfs
+    $(LOCAL_PATH)/recovery/zip:recovery/root/sbin/zip
+    $(LOCAL_PATH)/recovery/c2dsd.sh:recovery/root/sbin/c2dsd.sh
+
 # Product specfic packages
 PRODUCT_PACKAGES += \
     hwprops \
