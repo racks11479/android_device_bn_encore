@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/sbin/sh
 
-#Convert2SD TWRP by Racks11479
+#Convert2SD by Racks11479
 
 TW_FILENAME=$1
 
@@ -32,3 +32,5 @@ INIT=system/etc/vold.fstab
 sed -i 's/sdcard auto/sdcard 4/' $INIT
 		
 zip -ru $TW_FILENAME
+
+rm -r /tmp/c2sd
