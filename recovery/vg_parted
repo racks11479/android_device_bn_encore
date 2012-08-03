@@ -1,0 +1,91 @@
+#!/sbin/sh
+
+SDCARD=none
+
+mount /boot
+
+#First let's see what sort of mmc/SD card layout we are in
+if grep -q mmcblk0p8 /proc/partitions ; then
+    echo "Detected Standard B&N nook layout, emmc first"
+    SDCARD=mmcblk1
+elif grep -q mmcblk1p8 /proc/partitions ; then
+    echo "Detected Standard kernel layout, sdcard is first"
+    SDCARD=mmcblk0
+else
+    # Unknown layout
+    echo "Unknown layout detected! Please report as a bug."
+    echo "Please turn off the power"
+    while :; do sleep 1000 ; done
+fi
+
+#Now let's see if we have the partitions already and need to skip this step
+if grep -q ${SDCARD}p1 /proc/partitions ; then
+    :;
+else
+    echo "Error! Unexpected lack of boot partition on the SDCARD!"
+    echo "Please report!"
+    echo "Poweroff when ready"
+    while :; do sleep 1000 ; done
+fi
+
+if grep -q ${SDCARD}p2 /proc/partitions ; then
+    # Apparently some partitions do already exist. Let's see how many.
+    if grep -q ${SDCARD}p3 /proc/partitions ; then
+        # Ok, apparently at least three are there, so nothing to do for us
+        echo "It appears the SD card is already properly formatted"
+        echo "Skiping format"
+
+        # Just mount /boot
+        mountboot
+        exit 0
+    fi
+    # Ok, only partition 2. This is unexpected, abort.
+    echo "Error! Only two partitions detected where only one or four should be present!"
+    echo "Please reimage the card."
+    echo "Please power off now"
+    while :; do sleep 1000 ; done
+fi
+
+# Ok, the card is here, partitions need to be created
+# Let's see the card size. 1G card don't get FAT partition at the end.
+SDCARDSIZE=`sfdisk -s /dev/${SDCARD}`
+
+if [ $SDCARDSIZE -le 600000 ] ; then
+    # Less than 1G card? Abort!
+    echo "Unsupported too small card " $(( $SDCARDSIZE / 1024 )) "M in size"
+    echo "Should be at least 1G"
+    echo "Please power off now"
+    while :; do sleep 1000 ; done
+fi
+
+echo "Partitioning the card ..."
+
+if [ $SDCARDSIZE -le 1052225 ] ; then
+    # 1G card.
+    echo -e "n\np\n2\n\n+313267K\nn\np\n3\n\n\nw\n" | fdisk /dev/${SDCARD} >/dev/null
+elif [ $SDCARDSIZE -le 1800000 ] ; then
+    # Up to 2G
+    echo -e "n\np\n2\n\n+313267K\nn\np\n3\n\n+618502K\nn\np\n\n\nt\n4\nc\nw\n" | fdisk /dev/${SDCARD} >/dev/null
+else
+    # more than 2G card, let's be generous then
+    # /system and /data partitions same size as on emmc
+    echo -e "n\np\n2\n\n+465853K\nn\np\n3\n\n+979933K\nn\np\n\n\nt\n4\nc\nw\n" | fdisk /dev/${SDCARD} >/dev/null
+fi
+echo "Done partitioning, creating filesystems"
+
+mke2fs -t ext4 -L system /dev/${SDCARD}p2
+
+mke2fs -t ext4 -L data /dev/${SDCARD}p3
+
+e2fsck -fpDC0 /dev/${SDCARD}p2
+
+e2fsck -fpDC0 /dev/${SDCARD}p3
+
+# Only format 4th partition if we did create it
+if grep -q ${SDCARD}p4 /proc/partitions ; then
+    mkfs.vfat -n "SDcard" /dev/${SDCARD}p4
+fi
+
+echo "Done"
+
+umount /boot

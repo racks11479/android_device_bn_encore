@@ -121,7 +121,8 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/mkimage:recovery/root/sbin/mkimage \
     $(LOCAL_PATH)/recovery/mkbootfs:recovery/root/sbin/mkbootfs \
     $(LOCAL_PATH)/recovery/zip:recovery/root/sbin/zip \
-    $(LOCAL_PATH)/recovery/c2sd.sh:recovery/root/sbin/c2sd.sh
+    $(LOCAL_PATH)/recovery/c2sd.sh:recovery/root/sbin/c2sd.sh \
+    $(LOCAL_PATH)/recovery/vg_parted:recovery/root/sbin/vg_parted
 
 # Product specfic packages
 PRODUCT_PACKAGES += \
